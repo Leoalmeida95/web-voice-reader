@@ -2,22 +2,22 @@
 
 ## Idioma obrigatório
 
-Todas as respostas, explicações, comentários de código e documentação devem ser geradas **sempre em português do Brasil**.
+Todas as respostas, comentários de código, explicações e documentação devem ser geradas **sempre em português do Brasil**.
 
 ---
 
 # Objetivo do projeto
 
-Este projeto tem como objetivo criar uma ferramenta em Python que:
+Criar uma ferramenta em Python que:
 
 1. Abre uma página web usando Playwright
-2. Permite utilizar sessões autenticadas do navegador
+2. Permite reutilizar sessões autenticadas do navegador
 3. Extrai o conteúdo textual principal da página
 4. Limpa o texto removendo elementos irrelevantes
-5. Converte o texto em áudio usando Azure Speech Text-to-Speech
-6. Gera um arquivo de áudio narrado em português do Brasil
+5. Converte o texto em áudio usando um mecanismo gratuito de Text-to-Speech
+6. Salva o áudio localmente
 
-Fluxo esperado do sistema:
+Fluxo esperado:
 
 URL → navegador Playwright → extração de texto → limpeza → TTS → arquivo de áudio
 
@@ -27,29 +27,24 @@ URL → navegador Playwright → extração de texto → limpeza → TTS → arq
 
 Linguagem:
 
-* Python 3.11+
+Python 3.11+
 
 Bibliotecas principais:
 
-* playwright
-* beautifulsoup4
-* readability-lxml
-* azure-cognitiveservices-speech
-* python-dotenv
-* asyncio
-* logging
-
-Serviços externos:
-
-* Azure AI Speech (Text to Speech)
+playwright
+beautifulsoup4
+readability-lxml
+TTS (Coqui TTS)
+python-dotenv
+asyncio
+logging
 
 ---
 
 # Estrutura do projeto
 
-A estrutura do projeto deve seguir o padrão abaixo:
-
 project/
+
 main.py
 browser.py
 extractor.py
@@ -57,10 +52,12 @@ tts.py
 config.py
 utils.py
 requirements.txt
-.env
+.env.example
 README.md
 
-Responsabilidade de cada módulo:
+---
+
+# Responsabilidade de cada módulo
 
 main.py
 Orquestra todo o fluxo da aplicação.
@@ -69,47 +66,45 @@ browser.py
 Gerencia inicialização do navegador e navegação usando Playwright.
 
 extractor.py
-Responsável por extrair e limpar o texto da página.
+Extrai e limpa o texto principal da página.
 
 tts.py
-Converte texto em áudio usando Azure Speech.
+Converte texto em áudio usando Coqui TTS.
 
 config.py
-Carrega variáveis de ambiente e configurações do projeto.
+Carrega configurações do projeto.
 
 utils.py
-Funções utilitárias reutilizáveis.
+Funções utilitárias.
 
 ---
 
 # Skill obrigatória do Copilot
 
-O Copilot deve aplicar sempre a seguinte skill ao gerar código:
+Skill: Modular Python Architecture
 
-## Skill: Modular Python Architecture
-
-Toda implementação deve seguir estes princípios:
+Sempre aplicar:
 
 1. Código modular
 2. Separação clara de responsabilidades
-3. Funções pequenas e reutilizáveis
-4. Uso de tipagem (type hints)
-5. Uso de async/await quando possível
-6. Tratamento de erros estruturado
-7. Logging em vez de prints
-8. Comentários explicando decisões importantes
+3. Funções pequenas
+4. Type hints
+5. Tratamento de erros
+6. Logging estruturado
+7. Código legível
+8. Comentários explicativos
 
 ---
 
 # Padrões de código
 
-Sempre seguir:
+Seguir sempre:
 
 PEP8
-Type hints em funções
-Docstrings em funções públicas
+Type hints
+Docstrings
 
-Exemplo esperado:
+Exemplo:
 
 def extract_main_text(html: str) -> str:
 """
@@ -121,7 +116,7 @@ pass
 
 # Playwright
 
-O navegador deve usar **persistent context** para permitir login manual.
+O navegador deve utilizar **persistent context** para permitir login manual.
 
 Diretório de dados:
 
@@ -133,24 +128,28 @@ playwright.chromium.launch_persistent_context()
 
 ---
 
-# Azure Speech
+# Text-to-Speech
+
+O projeto deve utilizar **Coqui TTS** para gerar áudio localmente.
 
 Requisitos:
 
-Idioma:
-pt-BR
+* não utilizar serviços pagos
+* não utilizar APIs externas
+* gerar áudio localmente
+* formato WAV ou MP3
 
-Voz recomendada:
-pt-BR-FranciscaNeural
-
-Formato de saída:
-MP3
+O sistema deve carregar um modelo compatível com português.
 
 ---
 
 # Tratamento de textos longos
 
-O sistema deve dividir textos muito grandes em partes (chunking) antes de enviar para o TTS para evitar limites de caracteres da API.
+Se o texto for muito grande:
+
+1. dividir em partes
+2. gerar múltiplos áudios
+3. opcionalmente concatenar
 
 ---
 
@@ -161,17 +160,17 @@ Sempre:
 * validar entradas
 * tratar exceções
 * registrar logs
-* evitar funções muito grandes
+* evitar funções grandes
 * manter responsabilidades separadas
 
 ---
 
 # Comportamento esperado do Copilot
 
-Ao gerar código, o Copilot deve:
+O Copilot deve:
 
-1. Responder sempre em português
-2. Explicar brevemente decisões importantes
-3. Seguir a arquitetura definida
-4. Evitar gerar arquivos monolíticos
-5. Priorizar código legível e modular
+1. responder sempre em português
+2. seguir a arquitetura definida
+3. explicar decisões importantes
+4. evitar código monolítico
+5. priorizar código limpo e modular
