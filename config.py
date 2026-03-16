@@ -1,22 +1,12 @@
 """
 Carrega variáveis de ambiente e configurações do projeto.
 """
-from dataclasses import dataclass
-from dotenv import load_dotenv
-import os
+"""
+Configuração do projeto. Não há variáveis de ambiente obrigatórias para TTS local.
+"""
 
-@dataclass
-class Config:
-    AZURE_SPEECH_KEY: str
-    AZURE_SPEECH_REGION: str
-
-
-def get_config() -> Config:
+def get_config():
     """
-    Carrega as variáveis de ambiente do arquivo .env.
+    Retorna configuração padrão (placeholder para compatibilidade).
     """
-    load_dotenv()
-    return Config(
-        AZURE_SPEECH_KEY=os.getenv("AZURE_SPEECH_KEY", ""),
-        AZURE_SPEECH_REGION=os.getenv("AZURE_SPEECH_REGION", "")
-    )
+    return None

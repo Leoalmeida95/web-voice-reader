@@ -1,6 +1,8 @@
+
 # Web Voice Reader
 
-Ferramenta em Python para extrair o texto principal de uma página web e gerar um áudio narrado em português do Brasil usando Azure Speech.
+Ferramenta em Python para extrair o texto principal de uma página web e gerar um áudio narrado em português do Brasil usando o mecanismo open source Coqui TTS (local, gratuito).
+
 
 ## Instalação
 
@@ -13,14 +15,11 @@ pip install -r requirements.txt
 python -m playwright install
 ```
 
+
 ## Configuração
 
-Crie um arquivo `.env` na raiz do projeto com o seguinte conteúdo:
+Não é necessário configurar chaves de API. O mecanismo de voz é totalmente local.
 
-```
-AZURE_SPEECH_KEY=SEU_TOKEN_AQUI
-AZURE_SPEECH_REGION=southamerica
-```
 
 ## Uso
 
@@ -28,12 +27,17 @@ AZURE_SPEECH_REGION=southamerica
 python main.py https://exemplo.com/artigo
 ```
 
+Os arquivos de áudio serão gerados como `audio_1.wav`, `audio_2.wav`, etc.
+
+
 
 ## Como funciona o tratamento de textos longos
 
-Se o texto extraído da página for muito grande, ele será automaticamente dividido em partes ("chunks") respeitando o limite de caracteres do Azure TTS e preferencialmente em finais de frase. Para cada parte, será gerado um arquivo de áudio separado: `audio_1.mp3`, `audio_2.mp3`, etc.
+Se o texto extraído da página for muito grande, ele será automaticamente dividido em partes ("chunks") respeitando o limite de caracteres do mecanismo TTS e preferencialmente em finais de frase. Para cada parte, será gerado um arquivo de áudio separado: `audio_1.wav`, `audio_2.wav`, etc.
+
 
 ## Observações
 - O navegador será aberto na primeira execução para login manual, se necessário.
 - O diretório `browser-data/` armazena a sessão persistente do navegador.
-- O texto é dividido em partes se exceder o limite do Azure TTS, e cada parte gera um arquivo de áudio separado.
+- O texto é dividido em partes se exceder o limite do mecanismo TTS, e cada parte gera um arquivo de áudio separado.
+- O mecanismo de voz é totalmente local e gratuito (Coqui TTS).

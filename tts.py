@@ -2,26 +2,22 @@
 Converte texto em áudio usando Azure Speech.
 """
 import logging
-from azure.cognitiveservices.speech import SpeechConfig, SpeechSynthesizer, AudioConfig
-from config import Config
+from TTS.api import TTS
+import logging
+import asyncio
 
-VOICE = "pt-BR-FranciscaNeural"
-AUDIO_FORMAT = "audio-16khz-32kbitrate-mono-mp3"
+VOICE = "tts_models/multilingual/multi-dataset/your_tts"
 
-async def gerar_audio_tts(texto: str, nome_arquivo: str, config: Config) -> None:
+async def gerar_audio_tts(texto: str, nome_arquivo: str, config=None) -> None:
     """
-    Converte texto em áudio MP3 usando Azure Speech.
+    Converte texto em áudio WAV usando Coqui TTS local.
     """
     try:
-        speech_config = SpeechConfig(subscription=config.AZURE_SPEECH_KEY, region=config.AZURE_SPEECH_REGION)
-        speech_config.speech_synthesis_language = "pt-BR"
-        speech_config.speech_synthesis_voice_name = VOICE
-        audio_config = AudioConfig(filename=nome_arquivo)
-        synthesizer = SpeechSynthesizer(speech_config=speech_config, audio_config=audio_config)
-        result = synthesizer.speak_text_async(texto).get()
-        if result.reason != 0:
-            logging.error(f"Erro na síntese de fala: {result.reason}")
-        else:
-            logging.info(f"Áudio gerado: {nome_arquivo}")
+        # Carrega modelo apenas uma vez por execução
+        loop = asyncio.get_event_loop()
+        tts = await loop.run_in_executor(None, lambda: TTS(VOICE))
+        # Gera áudio em português
+        await loop.run_in_executor(None, lambda: tts.tts_to_file(text=texto, file_path=nome_arquivo, speaker="pt", language="pt"))
+        logging.info(f"Áudio gerado: {nome_arquivo}")
     except Exception as e:
         logging.exception(f"Erro ao gerar áudio: {e}")
