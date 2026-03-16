@@ -24,9 +24,9 @@ async def main():
         logging.error("Uso: python main.py <URL>")
         sys.exit(1)
     url = sys.argv[1]
-    config = get_config()
+    get_config()  # Mantém compatibilidade, mas não é usado
     try:
-        async with BrowserManager(config) as browser:
+        async with BrowserManager(None) as browser:
             html = await browser.carregar_pagina(url)
         texto = extrair_texto_principal(html)
         if not texto:
@@ -35,10 +35,11 @@ async def main():
         partes = dividir_texto_em_chunks(texto)
         logging.info(f"Texto dividido em {len(partes)} parte(s) para TTS.")
         arquivos_audio = []
+        from tts import generate_audio
         for i, parte in enumerate(partes):
             nome_arquivo = f"audio_{i+1}.mp3"
             logging.info(f"Gerando áudio para chunk {i+1}/{len(partes)}...")
-            await gerar_audio_tts(parte, nome_arquivo, config)
+            generate_audio(parte, nome_arquivo)
             arquivos_audio.append(nome_arquivo)
         logging.info(f"Áudio(s) gerado(s): {arquivos_audio}")
     except Exception as e:
