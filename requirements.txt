@@ -2,6 +2,6 @@ playwright
 beautifulsoup4
 readability-lxml
 python-dotenv
-asyncio
-TTS
 torch
+TTS
+lxml

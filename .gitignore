@@ -1,0 +1,87 @@
+# =========================
+
+# Python
+
+# =========================
+
+**pycache**/
+*.py[cod]
+*$py.class
+
+# Bytecode
+
+*.pyc
+*.pyo
+*.pyd
+
+# =========================
+
+# Virtual Environment
+
+# =========================
+
+.venv/
+venv/
+env/
+ENV/
+
+# =========================
+
+# Environment variables
+
+# =========================
+
+.env
+.env.local
+.env.*
+
+!.env.example
+
+# =========================
+
+# Python packaging
+
+# =========================
+
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# =========================
+
+# Logs
+
+# =========================
+
+*.log
+
+# =========================
+
+# Playwright
+
+# =========================
+
+browser-data/
+playwright-report/
+test-results/
+
+# =========================
+
+# TTS models / AI models
+
+# =========================
+
+models/
+tts_models/
+.cache/
+
+# =========================
+
+# Generated audio files
+
+# =========================
+
+*.wav
+*.mp3
+*.ogg
