@@ -3,12 +3,12 @@ Gerencia inicialização do navegador e navegação usando Playwright.
 """
 import logging
 from playwright.async_api import async_playwright, BrowserContext
-from config import Config
+from config import get_config
 
 BROWSER_DATA_DIR = "browser-data"
 
 class BrowserManager:
-    def __init__(self, config: Config):
+    def __init__(self, config: get_config):
         self.config = config
         self.context: BrowserContext | None = None
         self.playwright = None

@@ -14,6 +14,8 @@ def extrair_texto_principal(html: str) -> str:
         conteudo_html = doc.summary()
         soup = BeautifulSoup(conteudo_html, "html.parser")
         texto = soup.get_text(separator=" ", strip=True)
+        texto = texto.strip()
+        texto = " ".join(texto.split())
         return texto
     except Exception as e:
         logging.exception(f"Erro ao extrair texto principal: {e}")

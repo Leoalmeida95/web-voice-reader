@@ -1,22 +1,22 @@
 """
 Módulo principal: Orquestra o fluxo da aplicação.
 """
-import asyncio
-import logging
 from config import get_config
 from browser import BrowserManager
 from extractor import extrair_texto_principal
-from tts import gerar_audio_tts
 from utils import dividir_texto_em_chunks
-import sys
+import sys, asyncio, logging
+from tts import gerar_audio_tts as generate_audio
+from pathlib import Path
 
+OUTPUT_DIR = Path("output_audio")
+OUTPUT_DIR.mkdir(exist_ok=True)
 
 def configurar_logging():
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(message)s",
     )
-
 
 async def main():
     configurar_logging()
@@ -35,11 +35,10 @@ async def main():
         partes = dividir_texto_em_chunks(texto)
         logging.info(f"Texto dividido em {len(partes)} parte(s) para TTS.")
         arquivos_audio = []
-        from tts import generate_audio
         for i, parte in enumerate(partes):
-            nome_arquivo = f"audio_{i+1}.mp3"
+            nome_arquivo = OUTPUT_DIR / f"audio_{i+1}.mp3"
             logging.info(f"Gerando áudio para chunk {i+1}/{len(partes)}...")
-            generate_audio(parte, nome_arquivo)
+            generate_audio(parte, str(nome_arquivo))
             arquivos_audio.append(nome_arquivo)
         logging.info(f"Áudio(s) gerado(s): {arquivos_audio}")
     except Exception as e:

@@ -1,23 +1,27 @@
 """
-Converte texto em áudio usando Azure Speech.
+Converte texto em áudio usando gTTS.
 """
-import logging
-from TTS.api import TTS
-import logging
-import asyncio
 
-VOICE = "tts_models/multilingual/multi-dataset/your_tts"
+import logging
+from gtts import gTTS
 
-async def gerar_audio_tts(texto: str, nome_arquivo: str, config=None) -> None:
+
+def gerar_audio_tts(texto: str, nome_arquivo: str) -> None:
     """
-    Converte texto em áudio WAV usando Coqui TTS local.
+    Converte texto em áudio MP3 usando gTTS.
     """
+
     try:
-        # Carrega modelo apenas uma vez por execução
-        loop = asyncio.get_event_loop()
-        tts = await loop.run_in_executor(None, lambda: TTS(VOICE))
-        # Gera áudio em português
-        await loop.run_in_executor(None, lambda: tts.tts_to_file(text=texto, file_path=nome_arquivo, speaker="pt", language="pt"))
+        texto = texto.strip()
+
+        if not texto.endswith((".", "!", "?")):
+            texto += "."
+
+        tts = gTTS(text=texto, lang="pt-br")
+
+        tts.save(nome_arquivo)
+
         logging.info(f"Áudio gerado: {nome_arquivo}")
+
     except Exception as e:
         logging.exception(f"Erro ao gerar áudio: {e}")

@@ -85,3 +85,6 @@ tts_models/
 *.wav
 *.mp3
 *.ogg
+
+
+output_audio/
