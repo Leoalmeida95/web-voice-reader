@@ -1,0 +1,6 @@
+playwright
+beautifulsoup4
+readability-lxml
+azure-cognitiveservices-speech
+python-dotenv
+asyncio
