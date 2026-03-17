@@ -1,9 +1,9 @@
 """
 Gerencia inicialização do navegador e navegação usando Playwright.
 """
-import logging
 from playwright.async_api import async_playwright, BrowserContext
 from config import get_config
+import logging
 
 BROWSER_DATA_DIR = "browser-data"
 
@@ -36,3 +36,29 @@ class BrowserManager:
         html = await page.content()
         await page.close()
         return html
+
+
+async def conectar_chrome_existente():
+    playwright = await async_playwright().start()
+
+    browser = await playwright.chromium.connect_over_cdp(
+        "http://localhost:9222"
+    )
+
+    context = browser.contexts[0]
+
+    pages = context.pages
+
+    # pega a aba ativa
+    page = pages[-1]
+
+    return page
+
+async def obter_html_aba_ativa():
+    page = await conectar_chrome_existente()
+
+    await page.wait_for_load_state("networkidle")
+
+    html = await page.content()
+
+    return html
