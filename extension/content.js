@@ -1,40 +1,44 @@
-function isVisible(el) {
-    const style = window.getComputedStyle(el);
-    return (
-        style.display !== "none" &&
-        style.visibility !== "hidden" &&
-        style.opacity !== "0"
-    );
-}
+(async () => {
 
-function extractVisibleText(root) {
-    let text = "";
+    const text = extractMainContent();
 
-    const walker = document.createTreeWalker(
-        root,
-        NodeFilter.SHOW_TEXT,
-        null,
-        false
-    );
+    console.log("Texto extraído:", text.slice(0, 200));
 
-    let node;
+    const response = await fetch("http://localhost:8000/read-page", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ text })
+    });
 
-    while (node = walker.nextNode()) {
-        const parent = node.parentElement;
-
-        if (!parent) continue;
-
-        if (!isVisible(parent)) continue;
-
-        const value = node.nodeValue.trim();
-
-        if (value.length > 2) {
-            text += value + "\n";
-        }
+    if (!response.ok) {
+        console.error("Erro ao gerar áudio");
+        return;
     }
 
-    return text;
-}
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+
+    // remover player anterior
+    const oldPlayer = document.getElementById("web-voice-player");
+    if (oldPlayer) oldPlayer.remove();
+
+    const audio = document.createElement("audio");
+    audio.id = "web-voice-player";
+    audio.controls = true;
+    audio.src = url;
+
+    audio.style.position = "fixed";
+    audio.style.bottom = "20px";
+    audio.style.right = "20px";
+    audio.style.zIndex = "9999";
+
+    document.body.appendChild(audio);
+
+    audio.play();
+
+})();
 
 function extractMainContent() {
 
