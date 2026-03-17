@@ -17,7 +17,7 @@ def gerar_audio_tts(texto: str, nome_arquivo: str) -> None:
         if not texto.endswith((".", "!", "?")):
             texto += "."
 
-        tts = gTTS(text=texto, lang="pt-br")
+        tts = gTTS(text=texto, lang="pt")
 
         tts.save(nome_arquivo)
 

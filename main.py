@@ -6,13 +6,15 @@ from browser import BrowserManager, obter_html_aba_ativa
 from extractor import extrair_texto_principal
 from utils import dividir_texto_em_chunks
 from pathlib import Path
-from tts import gerar_audio_tts as generate_audio
+from gTTS import gerar_audio_tts as generate_audio
 
 import sys
 import asyncio
 import logging
 import time
 
+# if sys.platform.startswith("win"):
+#     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 OUTPUT_DIR = Path("output_audio")
 OUTPUT_DIR.mkdir(exist_ok=True)
