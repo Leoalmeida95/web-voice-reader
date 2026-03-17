@@ -1,34 +1,64 @@
 """
 Converte texto em áudio WAV usando Piper TTS.
 """
+
 import logging
-import os
+import subprocess
+from pathlib import Path
 from datetime import datetime
+
 from backend.config import OUTPUT_DIR
-from piper.tts import PiperVoice
+from backend.utils import dividir_texto_em_chunks
+
+
+PIPER_PATH = Path("piper/piper.exe")
+MODEL_PATH = Path("piper/models/pt_BR-faber-medium.onnx")
+
+
+def gerar_audio_tts(texto: str, arquivo_saida: str):
+
+    process = subprocess.Popen(
+        [
+            str(PIPER_PATH),
+            "-m",
+            str(MODEL_PATH),
+            "-f",
+            arquivo_saida,
+        ],
+        stdin=subprocess.PIPE,
+        text=True,
+    )
+
+    process.communicate(texto)
+
 
 def gerar_audio(texto: str, prefixo: str = "audio") -> list[str]:
     """
-    Gera arquivos WAV a partir de texto, dividindo em chunks se necessário.
-    Retorna lista de caminhos dos arquivos gerados.
+    Gera arquivos WAV a partir de texto dividindo em chunks.
     """
-    from backend.utils import dividir_texto_em_chunks
+
     arquivos = []
+
     chunks = dividir_texto_em_chunks(texto)
+
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    # Carrega modelo Piper
-    try:
-        voice = PiperVoice(model_path="pt_BR-faber-medium.onnx", config_path="pt_BR-faber-medium.json")
-    except Exception as e:
-        logging.exception("Erro ao carregar modelo Piper.")
-        return []
+
     for i, chunk in enumerate(chunks):
+
         nome_arquivo = f"{prefixo}_{timestamp}_{i+1}.wav"
-        caminho = os.path.join(OUTPUT_DIR, nome_arquivo)
+
+        caminho = OUTPUT_DIR / nome_arquivo
+
         try:
-            voice.synthesize(chunk, caminho)
+
+            gerar_audio_tts(chunk, str(caminho))
+
             logging.info(f"Áudio gerado: {caminho}")
-            arquivos.append(caminho)
+
+            arquivos.append(str(caminho))
+
         except Exception as e:
+
             logging.exception(f"Erro ao gerar áudio: {e}")
+
     return arquivos

@@ -1,9 +1,10 @@
 """
 Configurações do backend.
 """
-import os
+from pathlib import Path
 
-OUTPUT_DIR = os.path.join(os.path.dirname(__file__), '..', 'output_audio')
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-if not os.path.exists(OUTPUT_DIR):
-    os.makedirs(OUTPUT_DIR)
+OUTPUT_DIR = BASE_DIR / "output_audio"
+
+OUTPUT_DIR.mkdir(exist_ok=True)

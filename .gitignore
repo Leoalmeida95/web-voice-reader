@@ -1,12 +1,26 @@
 # =========================
-
 # Python
-
 # =========================
 
 **pycache**/
 *.py[cod]
 *$py.class
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# -----------------------------
+# FastAPI / runtime
+# -----------------------------
+.env
+.env.*
+
+# Virtual environment
+.venv/
+venv/
+
 
 # Bytecode
 
@@ -15,9 +29,7 @@
 *.pyd
 
 # =========================
-
 # Virtual Environment
-
 # =========================
 
 .venv/
@@ -26,9 +38,7 @@ env/
 ENV/
 
 # =========================
-
 # Environment variables
-
 # =========================
 
 .env
@@ -38,9 +48,7 @@ ENV/
 !.env.example
 
 # =========================
-
 # Python packaging
-
 # =========================
 
 build/
@@ -49,17 +57,13 @@ dist/
 .eggs/
 
 # =========================
-
 # Logs
-
 # =========================
 
 *.log
 
 # =========================
-
 # Playwright
-
 # =========================
 
 browser-data/
@@ -67,9 +71,7 @@ playwright-report/
 test-results/
 
 # =========================
-
 # TTS models / AI models
-
 # =========================
 
 models/
@@ -77,19 +79,35 @@ tts_models/
 .cache/
 
 # =========================
-
 # Generated audio files
-
 # =========================
 
 *.wav
 *.mp3
 *.ogg
 
-
+# -----------------------------
+# Output do sistema
+# -----------------------------
 output_audio/
 
-.venv/
-__pycache__/
+# -----------------------------
+# Piper binaries
+# -----------------------------
+piper/
+
+piper/*.dll
+piper/*.exe
+piper/*.ort
+
+# Modelos de voz (pesados)
+piper/models/*.onnx
+piper/models/*.json
+
+# -----------------------------
+# OS
+# -----------------------------
+.DS_Store
+Thumbs.db
 
 node_modules/

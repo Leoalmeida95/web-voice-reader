@@ -24,6 +24,10 @@ pip install piper-tts
 
 5. Baixe o modelo de voz em português (exemplo: pt_BR-faber-medium):
 
+5.1. Baixe Piper
+5.2. Extraia na pasta /piper
+5.3. Baixe o modelo de voz
+
 Baixe os arquivos `pt_BR-faber-medium.onnx` e `pt_BR-faber-medium.json` do repositório oficial do Piper e coloque-os na raiz do backend.
 
 6. Inicie o backend:
