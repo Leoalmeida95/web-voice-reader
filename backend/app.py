@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from backend.extractor import limpar_texto
 from backend.tts import gerar_audio_temp
 from fastapi.responses import StreamingResponse
+from starlette.background import BackgroundTask
 import os
 import tempfile
 
@@ -29,19 +30,17 @@ class ReadPageRequest(BaseModel):
 @app.post("/read-page")
 async def read_page(request: ReadPageRequest):
     texto_limpo = limpar_texto(request.text)
-    # Gera áudio em arquivo temporário
     temp_wav = gerar_audio_temp(texto_limpo)
     if not temp_wav or not os.path.exists(temp_wav):
         return StreamingResponse(b"", media_type="audio/wav")
-    def file_iterator():
-        with open(temp_wav, "rb") as f:
-            yield from f
-    response = StreamingResponse(file_iterator(), media_type="audio/wav")
-    # Remove arquivo temporário após envio
-    @response.call_on_close
-    def cleanup():
+    def cleanup(path):
         try:
-            os.remove(temp_wav)
+            os.remove(path)
         except Exception:
             pass
+    response = StreamingResponse(
+        open(temp_wav, "rb"),
+        media_type="audio/wav",
+        background=BackgroundTask(cleanup, temp_wav)
+    )
     return response
