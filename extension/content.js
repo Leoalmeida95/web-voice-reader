@@ -26,6 +26,7 @@
         let response;
 
         try {
+            
             response = await fetch("http://localhost:8000/read-page", {
                 method: "POST",
                 headers: {
