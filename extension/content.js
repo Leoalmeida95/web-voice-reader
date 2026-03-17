@@ -3,7 +3,6 @@
 
         const text = await extractMainContent();
 
-        // validação do texto extraído
         if (!text || typeof text !== "string" || text.trim().length < 50) {
             console.warn("Texto extraído é vazio ou muito pequeno.");
             return;
@@ -18,48 +17,26 @@
 
         // remover player anterior
         const oldPlayer = document.getElementById("web-voice-player-container");
-        if (oldPlayer) {
-            try { oldPlayer.pause(); } catch (e) {}
-            oldPlayer.remove();
-        }
+        if (oldPlayer) oldPlayer.remove();
 
-        let response;
+        // pedir ao background para buscar o áudio
+        const response = await new Promise(resolve => {
+            chrome.runtime.sendMessage(
+                { type: "tts", text: finalText },
+                resolve
+            );
+        });
 
-        try {
-            
-            response = await fetch("http://localhost:8000/read-page", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ text: finalText })
-            });
-        } catch (e) {
-            console.error("Erro de rede ao enviar texto para backend:", e);
+        if (!response || !response.success) {
+            console.error("Erro ao gerar áudio no backend");
             return;
         }
 
-        if (!response.ok || !response.headers.get("content-type")?.includes("audio/wav")) {
-            console.error("Resposta inesperada do backend.");
-            return;
-        }
-
-        let blob;
-
-        try {
-            blob = await response.blob();
-        } catch (e) {
-            console.error("Erro ao ler blob de áudio:", e);
-            return;
-        }
-
+        const bytes = new Uint8Array(response.audio);
+        const blob = new Blob([bytes], { type: "audio/wav" });
         const url = URL.createObjectURL(blob);
 
-        try {
-            createAudioPlayer(url);
-        } catch (e) {
-            console.warn("Falha ao criar player:", e);
-        }
+        createAudioPlayer(url);
 
     } catch (err) {
         console.error("Erro inesperado na extensão Web Voice Reader:", err);
@@ -68,7 +45,6 @@
 
 
 function waitForContent() {
-
     return new Promise(resolve => {
 
         const interval = setInterval(() => {
@@ -83,7 +59,6 @@ function waitForContent() {
         }, 300);
 
     });
-
 }
 
 
@@ -106,6 +81,7 @@ async function extractMainContent() {
     return text;
 }
 
+
 function createAudioPlayer(audioUrl) {
 
     const existing = document.getElementById("web-voice-player-container");
@@ -114,24 +90,31 @@ function createAudioPlayer(audioUrl) {
     const container = document.createElement("div");
     container.id = "web-voice-player-container";
 
-    container.style.position = "fixed";
-    container.style.bottom = "20px";
-    container.style.right = "20px";
-    container.style.width = "320px";
-    container.style.background = "#1f1f1f";
-    container.style.color = "#fff";
-    container.style.padding = "12px";
-    container.style.borderRadius = "10px";
-    container.style.boxShadow = "0 6px 16px rgba(0,0,0,0.4)";
-    container.style.zIndex = "999999";
+    Object.assign(container.style, {
+        position: "fixed",
+        bottom: "20px",
+        right: "20px",
+        width: "320px",
+        background: "#1f1f1f",
+        color: "#fff",
+        padding: "12px",
+        borderRadius: "10px",
+        boxShadow: "0 6px 16px rgba(0,0,0,0.4)",
+        zIndex: "999999",
+        fontFamily: "Arial"
+    });
 
     const title = document.createElement("div");
-    title.innerText = "🔊 Web Voice Reader";
+    title.textContent = "🔊 Web Voice Reader";
     title.style.fontWeight = "bold";
 
+    const audio = document.createElement("audio");
+    audio.src = audioUrl;
+
     const closeBtn = document.createElement("button");
-    closeBtn.innerText = "✖";
+    closeBtn.textContent = "✖";
     closeBtn.style.float = "right";
+
     closeBtn.onclick = () => {
         audio.pause();
         container.remove();
@@ -139,19 +122,16 @@ function createAudioPlayer(audioUrl) {
 
     title.appendChild(closeBtn);
 
-    const audio = document.createElement("audio");
-    audio.src = audioUrl;
-
     const playBtn = document.createElement("button");
-    playBtn.innerText = "▶";
+    playBtn.textContent = "▶";
 
     playBtn.onclick = () => {
         if (audio.paused) {
             audio.play();
-            playBtn.innerText = "⏸";
+            playBtn.textContent = "⏸";
         } else {
             audio.pause();
-            playBtn.innerText = "▶";
+            playBtn.textContent = "▶";
         }
     };
 
@@ -174,9 +154,9 @@ function createAudioPlayer(audioUrl) {
     container.appendChild(title);
     container.appendChild(progress);
     container.appendChild(playBtn);
-    container.appendChild(audio); // importante
+    container.appendChild(audio);
 
     document.body.appendChild(container);
 
-    audio.play().catch(()=>{});
+    audio.play().catch(() => {});
 }
