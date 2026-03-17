@@ -88,3 +88,8 @@ tts_models/
 
 
 output_audio/
+
+.venv/
+__pycache__/
+
+node_modules/

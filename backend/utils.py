@@ -1,18 +1,17 @@
 """
-Funções utilitárias reutilizáveis.
+Funções utilitárias.
 """
 from typing import List
 import re
 
-CHUNK_SIZE = 4000  # Limite seguro para Azure TTS
+CHUNK_SIZE = 4000
 
 def dividir_texto_em_chunks(texto: str, tamanho: int = CHUNK_SIZE) -> List[str]:
     """
-    Divide o texto em partes menores para o TTS, preferencialmente em finais de frase.
+    Divide o texto em partes menores para TTS, preferencialmente em finais de frase.
     """
     if len(texto) <= tamanho:
         return [texto]
-    # Quebra por sentenças usando regex
     sentencas = re.split(r'(?<=[.!?]) +', texto)
     chunks = []
     chunk_atual = ''

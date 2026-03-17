@@ -1,6 +1,7 @@
-playwright
+fastapi
+uvicorn
+gTTS
 beautifulsoup4
 readability-lxml
 python-dotenv
-gTTS
 lxml

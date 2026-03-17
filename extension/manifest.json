@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "Web Voice Reader",
+  "version": "1.0",
+  "description": "Envie o texto da página para narração por backend local.",
+  "permissions": ["activeTab", "scripting"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "content.js"
+  }
+}
