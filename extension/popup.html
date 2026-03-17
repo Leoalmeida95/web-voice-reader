@@ -1,12 +1,87 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Web Voice Reader</title>
+<meta charset="UTF-8">
+<title>Web Voice Reader</title>
+
+<style>
+
+body {
+  margin: 0;
+  width: 260px;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #1f1f1f;
+  color: white;
+}
+
+.container {
+  padding: 16px;
+  text-align: center;
+}
+
+.logo {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.logo span {
+  color: #4da3ff;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  background: #4da3ff;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+button:hover {
+  background: #3584d9;
+}
+
+#status {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #bfbfbf;
+}
+
+.footer {
+  margin-top: 12px;
+  font-size: 11px;
+  color: #8a8a8a;
+}
+
+</style>
 </head>
+
 <body>
-  <button id="sendText">Enviar texto da página</button>
+
+<div class="container">
+
+  <div class="logo">
+    🔊 <span>Web Voice Reader</span>
+  </div>
+
+  <button id="sendText">
+    ▶ Ler página
+  </button>
+
   <div id="status"></div>
-  <script src="popup.js"></script>
+
+  <div class="footer">
+    TTS local com Piper
+  </div>
+
+</div>
+
+<script src="popup.js"></script>
+
 </body>
 </html>

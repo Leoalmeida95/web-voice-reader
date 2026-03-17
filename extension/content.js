@@ -17,7 +17,7 @@
         }
 
         // remover player anterior
-        const oldPlayer = document.getElementById("web-voice-player");
+        const oldPlayer = document.getElementById("web-voice-player-container");
         if (oldPlayer) {
             try { oldPlayer.pause(); } catch (e) {}
             oldPlayer.remove();
@@ -55,35 +55,10 @@
 
         const url = URL.createObjectURL(blob);
 
-        const audio = document.createElement("audio");
-        audio.id = "web-voice-player";
-        audio.controls = true;
-        audio.preload = "auto";
-        audio.src = url;
-
-        audio.style.position = "fixed";
-        audio.style.bottom = "20px";
-        audio.style.right = "20px";
-        audio.style.zIndex = "9999";
-        audio.style.background = "#fff";
-        audio.style.borderRadius = "8px";
-        audio.style.boxShadow = "0 4px 12px rgba(0,0,0,0.2)";
-
-        // liberar URL quando terminar
-        audio.addEventListener("ended", () => {
-            URL.revokeObjectURL(url);
-        });
-
-        audio.addEventListener("pause", () => {
-            URL.revokeObjectURL(url);
-        });
-
-        document.body.appendChild(audio);
-
         try {
-            await audio.play();
+            createAudioPlayer(url);
         } catch (e) {
-            console.warn("Falha ao reproduzir áudio automaticamente:", e);
+            console.warn("Falha ao criar player:", e);
         }
 
     } catch (err) {
@@ -129,4 +104,79 @@ async function extractMainContent() {
         .join("\n\n");
 
     return text;
+}
+
+function createAudioPlayer(audioUrl) {
+
+    const existing = document.getElementById("web-voice-player-container");
+    if (existing) existing.remove();
+
+    const container = document.createElement("div");
+    container.id = "web-voice-player-container";
+
+    container.style.position = "fixed";
+    container.style.bottom = "20px";
+    container.style.right = "20px";
+    container.style.width = "320px";
+    container.style.background = "#1f1f1f";
+    container.style.color = "#fff";
+    container.style.padding = "12px";
+    container.style.borderRadius = "10px";
+    container.style.boxShadow = "0 6px 16px rgba(0,0,0,0.4)";
+    container.style.zIndex = "999999";
+
+    const title = document.createElement("div");
+    title.innerText = "🔊 Web Voice Reader";
+    title.style.fontWeight = "bold";
+
+    const closeBtn = document.createElement("button");
+    closeBtn.innerText = "✖";
+    closeBtn.style.float = "right";
+    closeBtn.onclick = () => {
+        audio.pause();
+        container.remove();
+    };
+
+    title.appendChild(closeBtn);
+
+    const audio = document.createElement("audio");
+    audio.src = audioUrl;
+
+    const playBtn = document.createElement("button");
+    playBtn.innerText = "▶";
+
+    playBtn.onclick = () => {
+        if (audio.paused) {
+            audio.play();
+            playBtn.innerText = "⏸";
+        } else {
+            audio.pause();
+            playBtn.innerText = "▶";
+        }
+    };
+
+    const progress = document.createElement("input");
+    progress.type = "range";
+    progress.min = 0;
+    progress.max = 100;
+    progress.value = 0;
+    progress.style.width = "100%";
+
+    audio.ontimeupdate = () => {
+        const percent = (audio.currentTime / audio.duration) * 100;
+        progress.value = percent || 0;
+    };
+
+    progress.oninput = () => {
+        audio.currentTime = (progress.value / 100) * audio.duration;
+    };
+
+    container.appendChild(title);
+    container.appendChild(progress);
+    container.appendChild(playBtn);
+    container.appendChild(audio); // importante
+
+    document.body.appendChild(container);
+
+    audio.play().catch(()=>{});
 }
