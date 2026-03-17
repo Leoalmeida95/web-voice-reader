@@ -38,22 +38,21 @@ function extractVisibleText(root) {
 
 function extractMainContent() {
 
-    let container =
-        document.querySelector(".show-content") ||
-        document.querySelector("#content") ||
-        document.querySelector("main") ||
-        document.querySelector("article");
+    let container = document.querySelector(".show-content");
 
     if (!container) {
-        container = document.body;
+        container =
+            document.querySelector("#wiki_page_show") ||
+            document.querySelector("main") ||
+            document.body;
     }
 
     // remover coisas irrelevantes
     container.querySelectorAll(
-        "nav,aside,footer,button,menu,script,style,svg"
+        "nav,aside,footer,button,menu,script,style,svg,iframe"
     ).forEach(el => el.remove());
 
-    let text = extractVisibleText(container);
+    let text = container.innerText || "";
 
     text = text
         .replace(/\s+/g, " ")
