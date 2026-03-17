@@ -4,7 +4,7 @@ document.getElementById('sendText').addEventListener('click', async () => {
     const tab = tabs[0];
     chrome.scripting.executeScript({
       target: {tabId: tab.id},
-      func: () => document.body.innerText
+      func: () => window.extractMainContent()
     }, async (results) => {
       const texto = results[0].result;
       document.getElementById('status').textContent = 'Enviando para backend...';
