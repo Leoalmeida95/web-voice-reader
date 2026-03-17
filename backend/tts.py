@@ -1,3 +1,21 @@
+import tempfile
+def gerar_audio_temp(texto: str) -> str:
+    """
+    Gera áudio WAV em arquivo temporário usando Piper.
+    Retorna caminho do arquivo temporário.
+    """
+    from backend.utils import dividir_texto_em_chunks
+    chunks = dividir_texto_em_chunks(texto)
+    temp_wav = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+    temp_wav.close()
+    try:
+        # Para textos longos, concatena chunks
+        for chunk in chunks:
+            gerar_audio_tts(chunk, temp_wav.name)
+        return temp_wav.name
+    except Exception as e:
+        logging.exception(f"Erro ao gerar áudio temporário: {e}")
+        return ""
 """
 Converte texto em áudio WAV usando Piper TTS.
 """

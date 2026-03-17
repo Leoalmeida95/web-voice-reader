@@ -14,8 +14,17 @@ document.getElementById('sendText').addEventListener('click', async () => {
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({text: texto})
         });
-        const data = await resp.json();
-        document.getElementById('status').textContent = 'Áudio gerado!';
+        const blob = await resp.blob();
+        const url = URL.createObjectURL(blob);
+        // Pausar qualquer áudio já em execução
+        if (window._audioPlayer && !window._audioPlayer.paused) {
+          window._audioPlayer.pause();
+          window._audioPlayer.currentTime = 0;
+        }
+        const audio = new Audio(url);
+        window._audioPlayer = audio;
+        audio.play();
+        document.getElementById('status').textContent = 'Áudio reproduzido!';
       } catch (e) {
         document.getElementById('status').textContent = 'Erro ao enviar texto.';
       }
