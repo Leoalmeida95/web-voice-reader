@@ -84,7 +84,7 @@ async def stream_tts(text: str = Query(...)):
 
         # 🔥 UM processo só (isso muda tudo)
         process = subprocess.Popen(
-            [PIPER_PATH, "-m", MODEL_PATH, "--output-raw"],
+            [PIPER_PATH, "-m", MODEL_PATH],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,

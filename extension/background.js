@@ -2,23 +2,24 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message.type === "tts") {
 
-    fetch("http://localhost:8000/read-page", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ text: message.text })
-    })
-    .then(r => r.arrayBuffer())
-    .then(buffer => {
-      sendResponse({
-        success: true,
-        audio: Array.from(new Uint8Array(buffer))
+      fetch("http://localhost:8000/read-page", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: message.text })
+      })
+      .then(res => res.arrayBuffer())
+      .then(buffer => {
+          sendResponse({
+              success: true,
+              audio: Array.from(new Uint8Array(buffer))
+          });
+      })
+      .catch(err => {
+          console.error(err);
+          sendResponse({ success: false });
       });
-    })
-    .catch(() => sendResponse({ success: false }));
 
-    return true;
+      return true;
   }
 
  // resolver questão (Groq)
