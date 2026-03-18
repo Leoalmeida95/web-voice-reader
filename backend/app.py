@@ -70,37 +70,44 @@ def split_text_into_chunks(text):
         chunks.append(current.strip())
     return chunks
 
-# Streaming TTS endpoint
 @app.get("/stream-tts")
 async def stream_tts(text: str = Query(...)):
     texto_limpo = limpar_texto(text)
+
     if not texto_limpo or len(texto_limpo.strip()) < 10:
         return StreamingResponse(b"", media_type="audio/wav")
-    def generate_audio_stream(texto):
+
+    def generate_audio_stream():
+
         PIPER_PATH = "piper/piper.exe"
         MODEL_PATH = "piper/models/pt_BR-faber-medium.onnx"
-        chunks = split_text_into_chunks(texto)
-        for chunk in chunks:
-            # Gera áudio para cada chunk
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_wav:
-                temp_wav.close()
-                # Chama Piper para gerar áudio
-                process = subprocess.Popen(
-                    [PIPER_PATH, "-m", MODEL_PATH, "-f", temp_wav.name],
-                    stdin=subprocess.PIPE,
-                    text=True
-                )
-                try:
-                    process.communicate(chunk)
-                    with open(temp_wav.name, "rb") as f:
-                        while True:
-                            data = f.read(4096)
-                            if not data:
-                                break
-                            yield data
-                finally:
-                    try:
-                        os.remove(temp_wav.name)
-                    except Exception:
-                        pass
-    return StreamingResponse(generate_audio_stream(texto_limpo), media_type="audio/wav")
+
+        # 🔥 UM processo só (isso muda tudo)
+        process = subprocess.Popen(
+            [PIPER_PATH, "-m", MODEL_PATH, "--output-raw"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            bufsize=0
+        )
+
+        try:
+            # envia texto inteiro
+            process.stdin.write((texto_limpo + "\n").encode("utf-8"))
+            process.stdin.flush()
+            process.stdin.close()
+
+            # 🔥 stream contínuo
+            while True:
+                chunk = process.stdout.read(4096)
+                if not chunk:
+                    break
+                yield chunk
+
+        finally:
+            process.kill()
+
+    return StreamingResponse(
+        generate_audio_stream(),
+        media_type="audio/wav"
+    )

@@ -225,6 +225,11 @@ function createAudioPlayer(text) {
     audio.src = `http://localhost:8000/stream-tts?text=${encodeURIComponent(text)}`;
     audio.autoplay = true;
     audio.controls = true;
+    audio.preload = "auto";
+
+    audio.addEventListener("canplay", () => {
+        audio.play().catch(()=>{});
+    });
 
     const closeBtn = document.createElement("button");
     closeBtn.textContent = "✖";
@@ -236,6 +241,15 @@ function createAudioPlayer(text) {
     };
 
     title.appendChild(closeBtn);
+
+    const loading = document.createElement("div");
+    loading.innerText = "🔄 Carregando áudio...";
+    loading.style.fontSize = "12px";
+    container.appendChild(loading);
+
+    audio.addEventListener("playing", () => {
+        loading.remove();
+    });
 
     const playBtn = document.createElement("button");
     playBtn.textContent = "▶";
