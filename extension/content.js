@@ -197,23 +197,49 @@ function waitForContent() {
 
 
 async function extractMainContent() {
-
     const container = await waitForContent();
-
     if (!container) {
         console.warn("Container de conteúdo não encontrado.");
         return "";
     }
-
-    const nodes = container.querySelectorAll("h1, h2, h3, p, li");
-
-    const text = Array.from(nodes)
-        .map(node => node.textContent.trim())
-        .filter(t => t.length > 20)
-        .join("\n\n");
-
+    // Preferir primeiros parágrafos e conteúdo principal
+    const nodes = container.querySelectorAll("p, h1, h2, h3");
+    let textParts = [];
+    let totalLen = 0;
+    for (let node of nodes) {
+        let t = node.textContent.trim();
+        if (t.length < 20) continue;
+        textParts.push(t);
+        totalLen += t.length;
+        if (totalLen > 1800) break;
+    }
+    let text = textParts.join("\n\n");
+    // Smart truncation: prefer final de frase
+    if (text.length > 1800) {
+        let cut = text.slice(0, 1800);
+        let lastSentence = cut.lastIndexOf('.') > 0 ? cut.lastIndexOf('.') : cut.lastIndexOf('!') > 0 ? cut.lastIndexOf('!') : cut.lastIndexOf('?');
+        if (lastSentence > 1000) {
+            text = cut.slice(0, lastSentence + 1);
+        } else {
+            text = cut;
+        }
+    }
     return text;
 }
+
+    function extractPreviewContent() {
+        // Preview mode: retorna só os primeiros 2-3 parágrafos significativos
+        const container = document.querySelector('.show-content') || document.body;
+        const nodes = container.querySelectorAll('p');
+        let preview = [];
+        for (let node of nodes) {
+            let t = node.textContent.trim();
+            if (t.length < 20) continue;
+            preview.push(t);
+            if (preview.length >= 3) break;
+        }
+        return preview.join("\n\n");
+    }
 
 
 function createAudioPlayer(audioUrl) {
