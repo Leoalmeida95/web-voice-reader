@@ -231,6 +231,10 @@ Este projeto foi desenvolvido como um estudo prático envolvendo:
 
 ---
 
+## Groq
+
+https://console.groq.com/
+
 ## 📄 Licença
 
 MIT

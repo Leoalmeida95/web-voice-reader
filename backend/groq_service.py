@@ -1,5 +1,7 @@
 import logging
-from config.settings import GROQ_API_KEY
+from config.settings import (
+    GROQ_API_KEY
+)
 
 try:
     from groq import Groq
