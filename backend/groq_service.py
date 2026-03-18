@@ -8,7 +8,7 @@ try:
 except ImportError:
     Groq = None
 
-MODEL = "llama-3.1-70b-versatile"
+MODEL = "llama-3.1-8b-instant"
 
 PROMPT_TEMPLATE = (
     "Você é um especialista em resolver questões de múltipla escolha.\n"
