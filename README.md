@@ -1,74 +1,236 @@
+# 🔊 Web Voice Reader
 
+Extensão de navegador + backend em Python que permite **ouvir o conteúdo de páginas web** com voz neural em português utilizando **Piper TTS (local)**.
 
-# Web Voice Reader
+---
 
-Ferramenta em Python para extrair o conteúdo principal de uma página web (usando Readability.js) e gerar áudio narrado em português do Brasil com voz neural (Piper TTS).
+## 🚀 Visão Geral
 
+O Web Voice Reader extrai automaticamente o conteúdo principal de uma página web e o transforma em áudio, exibindo um **player integrado diretamente na página**.
 
+### Fluxo da aplicação
 
-## Instalação
+```
+Usuário abre uma página
+↓
+Clica na extensão
+↓
+Content Script extrai o conteúdo
+↓
+Mensagem enviada ao Background Script
+↓
+Background chama o backend (FastAPI)
+↓
+Piper TTS gera áudio
+↓
+Áudio retorna como stream
+↓
+Player é exibido na página
+↓
+Áudio começa a tocar
+```
 
-1. Clone o repositório
-2. Crie um ambiente virtual (opcional, mas recomendado)
-3. Instale as dependências:
+---
+
+## 🧱 Arquitetura
+
+```
+web-voice-reader/
+│
+├── backend/
+│   ├── app.py
+│   ├── extractor.py
+│   ├── tts.py
+│   └── utils.py
+│
+├── extension/
+│   ├── manifest.json
+│   ├── popup.html
+│   ├── popup.js
+│   ├── content.js
+│   └── background.js
+│
+├── piper/
+│   ├── piper.exe
+│   └── models/
+│       └── pt_BR-faber-medium.onnx
+│
+├── output_audio/
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## ⚙️ Tecnologias Utilizadas
+
+### Backend
+
+* FastAPI
+* Piper TTS (voz neural local)
+* Uvicorn
+
+### Extensão
+
+* Chrome Extension API (Manifest V3)
+* JavaScript
+* DOM Extraction
+
+---
+
+## 🧩 Funcionalidades
+
+* 🔎 Extração do conteúdo principal da página
+* 🔊 Conversão de texto em áudio (TTS local)
+* 🎧 Player de áudio integrado na página
+* ⚡ Comunicação via background script (evita bloqueios de rede)
+* 🧠 Preparado para integração com IA (resolução de questões)
+
+---
+
+## 🛠️ Instalação
+
+### 1. Clonar o repositório
+
+```bash
+git clone <seu-repositorio>
+cd web-voice-reader
+```
+
+---
+
+### 2. Criar ambiente virtual (opcional)
+
+```bash
+python -m venv venv
+source venv/bin/activate  # Linux/macOS
+venv\Scripts\activate     # Windows
+```
+
+---
+
+### 3. Instalar dependências
 
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Instale o Piper TTS:
+---
 
-```bash
-pip install piper-tts
+### 4. Configurar o Piper TTS
+
+1. Baixe o Piper
+2. Extraia na pasta `/piper`
+3. Baixe o modelo:
+
+* `pt_BR-faber-medium.onnx`
+* `pt_BR-faber-medium.onnx.json`
+
+Coloque em:
+
+```
+/piper/models/
 ```
 
-5. Baixe o modelo de voz em português (exemplo: pt_BR-faber-medium):
+---
 
-5.1. Baixe Piper
-5.2. Extraia na pasta /piper
-5.3. Baixe o modelo de voz
+## ▶️ Executando o projeto
 
-Baixe os arquivos `pt_BR-faber-medium.onnx` e `pt_BR-faber-medium.json` do repositório oficial do Piper e coloque-os na raiz do backend.
-
-6. Inicie o backend:
+### 1. Iniciar o backend
 
 ```bash
 uvicorn backend.app:app --reload
 ```
 
+Acesse para verificar:
 
+```
+http://localhost:8000/docs
+```
 
-## Configuração
+---
 
-Não é necessário configurar chaves de API. O mecanismo de voz é totalmente local (Piper).
+### 2. Instalar a extensão no Chrome
 
+1. Abra:
 
+```
+chrome://extensions
+```
 
-## Uso
+2. Ative **Modo Desenvolvedor**
+3. Clique em:
 
-1. Instale a extensão manualmente no Chrome:
-	- Abra `chrome://extensions`.
-	- Ative o modo desenvolvedor.
-	- Clique em "Carregar sem compactação" e selecione a pasta `extension/`.
+```
+Carregar sem compactação
+```
 
-2. Abra uma página web.
-3. Clique no ícone da extensão e depois em "Enviar texto da página".
-4. O texto será extraído usando Readability.js e enviado para o backend.
-5. O backend gera arquivos WAV com voz neural (Piper) em `output_audio/`.
+4. Selecione a pasta:
 
+```
+/extension
+```
 
+---
 
+### 3. Usar a extensão
 
-## Como funciona o tratamento de textos longos
+1. Abra qualquer página web
+2. Clique no ícone da extensão
+3. Clique em **"▶ Ler página"**
+4. O player aparecerá no canto da página
+5. O áudio começará automaticamente
 
-Se o texto extraído da página for muito grande, ele será automaticamente dividido em partes ("chunks") respeitando o limite de caracteres do mecanismo Piper e preferencialmente em finais de frase. Para cada parte, será gerado um arquivo de áudio separado: `audio_1.wav`, `audio_2.wav`, etc.
+---
 
+## 🎧 Player de Áudio
 
+O player é exibido diretamente na página e permite:
 
-## Observações
-- O backend deve estar rodando localmente em `http://localhost:8000`.
-- O áudio é gerado em português do Brasil e salvo como WAV.
-- Textos longos são divididos em partes e cada parte gera um arquivo WAV.
-- O nome do arquivo inclui um timestamp para evitar conflitos.
-- A extensão utiliza Readability.js para extrair apenas o conteúdo principal da página.
-- O mecanismo de voz utiliza Piper TTS, modelo neural open source.
+* ▶ Play / Pause
+* ⏱ Barra de progresso
+* ❌ Fechar player
+
+---
+
+## ⚠️ Observações
+
+* O backend deve estar rodando em:
+
+  ```
+  http://localhost:8000
+  ```
+
+* O processamento de áudio é **100% local (offline)**
+
+* A extensão utiliza:
+
+  * Content Script → extração
+  * Background Script → requisições (evita bloqueios do Chrome)
+
+---
+
+## 🧠 Próximas melhorias
+
+* ✔ Detecção de perguntas na página
+* ✔ Integração com IA (resolução automática)
+* ✔ Explicação das respostas via voz
+* ✔ Streaming de áudio em tempo real
+* ✔ Highlight do texto sendo narrado
+
+---
+
+## 💡 Sobre o projeto
+
+Este projeto foi desenvolvido como um estudo prático envolvendo:
+
+* Extensões de navegador
+* Processamento de linguagem natural
+* Text-to-Speech local
+* Integração com IA
+
+---
+
+## 📄 Licença
+
+MIT
