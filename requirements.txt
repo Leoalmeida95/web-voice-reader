@@ -5,3 +5,4 @@ readability-lxml
 python-dotenv
 lxml
 piper-tts
+groq
