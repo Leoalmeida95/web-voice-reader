@@ -197,6 +197,7 @@ async function extractMainContent() {
 
 
 function createAudioPlayer(text) {
+
     const existing = document.getElementById("web-voice-player-container");
     if (existing) existing.remove();
 
@@ -221,42 +222,48 @@ function createAudioPlayer(text) {
     title.textContent = "🔊 Web Voice Reader";
     title.style.fontWeight = "bold";
 
-    const audio = document.createElement("audio");
-    audio.src = `http://localhost:8000/stream-tts?text=${encodeURIComponent(text)}`;
-    audio.autoplay = true;
-    audio.controls = true;
-    audio.preload = "auto";
-
-    audio.addEventListener("canplay", () => {
-        audio.play().catch(()=>{});
-    });
-
     const closeBtn = document.createElement("button");
     closeBtn.textContent = "✖";
     closeBtn.style.float = "right";
-
-    closeBtn.onclick = () => {
-        audio.pause();
-        container.remove();
-    };
 
     title.appendChild(closeBtn);
 
     const loading = document.createElement("div");
     loading.innerText = "🔄 Carregando áudio...";
     loading.style.fontSize = "12px";
-    container.appendChild(loading);
+    loading.style.marginTop = "6px";
 
-    audio.addEventListener("playing", () => {
-        loading.remove();
-    });
+    const audio = document.createElement("audio");
+
+    audio.src = `http://localhost:8000/stream-tts?text=${encodeURIComponent(text)}`;
+    audio.controls = false;
+    audio.autoplay = true;
+    audio.preload = "auto";
+
+    // 🔥 remove loading com segurança
+    const removeLoading = () => {
+        if (loading.parentNode) loading.remove();
+    };
+
+    audio.addEventListener("playing", removeLoading);
+    audio.addEventListener("canplay", removeLoading);
+
+    // 🔥 fallback (evita travar)
+    setTimeout(removeLoading, 3000);
+
+    closeBtn.onclick = () => {
+        audio.pause();
+        audio.src = "";
+        container.remove();
+    };
 
     const playBtn = document.createElement("button");
     playBtn.textContent = "▶";
+    playBtn.style.marginTop = "8px";
 
     playBtn.onclick = () => {
         if (audio.paused) {
-            audio.play();
+            audio.play().catch(()=>{});
             playBtn.textContent = "⏸";
         } else {
             audio.pause();
@@ -270,22 +277,28 @@ function createAudioPlayer(text) {
     progress.max = 100;
     progress.value = 0;
     progress.style.width = "100%";
+    progress.style.marginTop = "8px";
 
+    // 🔥 protege contra duration inválido
     audio.ontimeupdate = () => {
+        if (!audio.duration || !isFinite(audio.duration)) return;
         const percent = (audio.currentTime / audio.duration) * 100;
         progress.value = percent || 0;
     };
 
     progress.oninput = () => {
+        if (!audio.duration || !isFinite(audio.duration)) return;
         audio.currentTime = (progress.value / 100) * audio.duration;
     };
 
     container.appendChild(title);
+    container.appendChild(loading);
     container.appendChild(progress);
     container.appendChild(playBtn);
     container.appendChild(audio);
 
     document.body.appendChild(container);
 
-    audio.play().catch(() => {});
+    // 🔥 tenta tocar (sem duplicar lógica)
+    audio.play().catch(()=>{});
 }
