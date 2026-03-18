@@ -47,61 +47,37 @@
     // Também reage a resize
     window.addEventListener("resize", updateButtonPosition);
 
+
     btn.onclick = async () => {
-
         const questionText = extractQuestion();
-
         if (!questionText) {
             alert('Não foi possível extrair a questão.');
             return;
         }
-
         btn.disabled = true;
         btn.textContent = 'Resolvendo...';
-
         try {
-
             const response = await new Promise(resolve => {
                 chrome.runtime.sendMessage(
                     { type: "solve_question", text: questionText },
                     resolve
                 );
             });
-
             if (!response || !response.success) {
                 throw new Error("Erro ao resolver questão");
             }
-
             const resposta = response.answer;
-
             if (!resposta) {
                 throw new Error("Resposta vazia");
             }
-
-            const ttsResponse = await new Promise(resolve => {
-                chrome.runtime.sendMessage(
-                    { type: "tts", text: resposta },
-                    resolve
-                );
-            });
-
-            if (!ttsResponse || !ttsResponse.success) {
-                throw new Error("Erro ao gerar áudio");
-            }
-
-            const bytes = new Uint8Array(ttsResponse.audio);
-            const blob = new Blob([bytes], { type: "audio/wav" });
-            const url = URL.createObjectURL(blob);
-
-            createAudioPlayer(url);
-
+            // Toca áudio via streaming direto
+            createAudioPlayer(resposta);
         } catch (e) {
             alert('Erro ao resolver com IA: ' + e.message);
         } finally {
             btn.disabled = false;
             btn.textContent = '🧠 Resolver com IA';
         }
-
     };
 
     document.body.appendChild(btn);
@@ -132,46 +108,24 @@ function extractQuestion() {
     return `Pergunta:\n${question}\n\nAlternativas:\n${alternatives.join('\n')}`;
 }
 
+
 (async () => {
     try {
-
         const text = await extractMainContent();
-
         if (!text || typeof text !== "string" || text.trim().length < 50) {
             console.warn("Texto extraído é vazio ou muito pequeno.");
             return;
         }
-
         let finalText = text;
-
         if (finalText.length > 20000) {
             finalText = finalText.slice(0, 20000);
             console.warn("Texto foi truncado para 20000 caracteres.");
         }
-
         // remover player anterior
         const oldPlayer = document.getElementById("web-voice-player-container");
         if (oldPlayer) oldPlayer.remove();
-
-        // pedir ao background para buscar o áudio
-        const response = await new Promise(resolve => {
-            chrome.runtime.sendMessage(
-                { type: "tts", text: finalText },
-                resolve
-            );
-        });
-
-        if (!response || !response.success) {
-            console.error("Erro ao gerar áudio no backend");
-            return;
-        }
-
-        const bytes = new Uint8Array(response.audio);
-        const blob = new Blob([bytes], { type: "audio/wav" });
-        const url = URL.createObjectURL(blob);
-
-        createAudioPlayer(url);
-
+        // Toca áudio via streaming direto
+        createAudioPlayer(finalText);
     } catch (err) {
         console.error("Erro inesperado na extensão Web Voice Reader:", err);
     }
@@ -242,8 +196,7 @@ async function extractMainContent() {
     }
 
 
-function createAudioPlayer(audioUrl) {
-
+function createAudioPlayer(text) {
     const existing = document.getElementById("web-voice-player-container");
     if (existing) existing.remove();
 
@@ -269,7 +222,9 @@ function createAudioPlayer(audioUrl) {
     title.style.fontWeight = "bold";
 
     const audio = document.createElement("audio");
-    audio.src = audioUrl;
+    audio.src = `http://localhost:8000/stream-tts?text=${encodeURIComponent(text)}`;
+    audio.autoplay = true;
+    audio.controls = true;
 
     const closeBtn = document.createElement("button");
     closeBtn.textContent = "✖";

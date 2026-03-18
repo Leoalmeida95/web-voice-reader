@@ -1,7 +1,7 @@
 """
 API FastAPI para geração de áudio.
 """
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from backend.extractor import limpar_texto
@@ -9,8 +9,7 @@ from backend.tts import gerar_audio_temp
 from backend.groq_service import resolver_questao
 from fastapi.responses import StreamingResponse
 from starlette.background import BackgroundTask
-import logging
-import os
+import logging, os, subprocess, tempfile, re
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
@@ -55,3 +54,53 @@ async def solve_question(request: QuestionRequest):
         return {"answer": "Erro: texto inválido"}
     resposta = resolver_questao(request.text)
     return {"answer": resposta}
+
+def split_text_into_chunks(text):
+    sentences = re.split(r'(?<=[.!?])\s+', text)
+    chunks = []
+    current = ''
+    for sentence in sentences:
+        if len(current) + len(sentence) <= 200:
+            current += (' ' if current else '') + sentence
+        else:
+            if current:
+                chunks.append(current.strip())
+            current = sentence
+    if current:
+        chunks.append(current.strip())
+    return chunks
+
+# Streaming TTS endpoint
+@app.get("/stream-tts")
+async def stream_tts(text: str = Query(...)):
+    texto_limpo = limpar_texto(text)
+    if not texto_limpo or len(texto_limpo.strip()) < 10:
+        return StreamingResponse(b"", media_type="audio/wav")
+    def generate_audio_stream(texto):
+        PIPER_PATH = "piper/piper.exe"
+        MODEL_PATH = "piper/models/pt_BR-faber-medium.onnx"
+        chunks = split_text_into_chunks(texto)
+        for chunk in chunks:
+            # Gera áudio para cada chunk
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_wav:
+                temp_wav.close()
+                # Chama Piper para gerar áudio
+                process = subprocess.Popen(
+                    [PIPER_PATH, "-m", MODEL_PATH, "-f", temp_wav.name],
+                    stdin=subprocess.PIPE,
+                    text=True
+                )
+                try:
+                    process.communicate(chunk)
+                    with open(temp_wav.name, "rb") as f:
+                        while True:
+                            data = f.read(4096)
+                            if not data:
+                                break
+                            yield data
+                finally:
+                    try:
+                        os.remove(temp_wav.name)
+                    except Exception:
+                        pass
+    return StreamingResponse(generate_audio_stream(texto_limpo), media_type="audio/wav")
