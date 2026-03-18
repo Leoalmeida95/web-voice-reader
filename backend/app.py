@@ -1,16 +1,16 @@
 """
 API FastAPI para geração de áudio.
 """
-import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from backend.extractor import limpar_texto
 from backend.tts import gerar_audio_temp
+from backend.groq_service import resolver_questao
 from fastapi.responses import StreamingResponse
 from starlette.background import BackgroundTask
+import logging
 import os
-import tempfile
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
@@ -44,3 +44,14 @@ async def read_page(request: ReadPageRequest):
         background=BackgroundTask(cleanup, temp_wav)
     )
     return response
+
+class QuestionRequest(BaseModel):
+    text: str
+
+@app.post("/solve-question")
+async def solve_question(request: QuestionRequest):
+    if not request.text or len(request.text.strip()) < 10:
+        logging.warning("Texto de questão inválido recebido.")
+        return {"answer": "Erro: texto inválido"}
+    resposta = resolver_questao(request.text)
+    return {"answer": resposta}
