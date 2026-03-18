@@ -8,14 +8,15 @@ try:
 except ImportError:
     Groq = None
 
-MODEL = "llama-3.1-8b-instant"
+MODEL = "llama-3.1-70b-versatile"
 
 PROMPT_TEMPLATE = (
-    "You are an assistant that solves multiple-choice questions.\n"
-    "Answer in this format:\n"
-    "Resposta: <letter>\n"
-    "Explicação: <short explanation>\n\n"
-    "Question:\n{texto}"
+    "Você é um especialista em resolver questões de múltipla escolha.\n"
+    "Escolha a alternativa correta.\n"
+    "Responda exatamente no formato:\n"
+    "Resposta: <letra>\n"
+    "Explicação: <curta>\n"
+    "Questão:\n{texto}"
 )
 
 def resolver_questao(texto: str) -> str:
@@ -26,7 +27,8 @@ def resolver_questao(texto: str) -> str:
         logging.error("Groq SDK não instalado ou API key ausente.")
         return "Erro: Groq API não disponível."
     prompt = PROMPT_TEMPLATE.format(texto=texto)
-    logging.info(f"Enviando questão para Groq: {texto[:200]}")
+    logging.info(f"Tamanho do texto: {len(texto)}")
+    logging.info(f"Texto (preview): {texto[:200]}...")
     try:
         client = Groq(api_key=GROQ_API_KEY)
         response = client.chat.completions.create(
@@ -36,6 +38,7 @@ def resolver_questao(texto: str) -> str:
             temperature=0.2
         )
         answer = response.choices[0].message.content.strip()
+        logging.info(f"Tamanho do texto: {len(answer)}")
         logging.info(f"Resposta Groq: {answer[:200]}")
         return answer
     except Exception as e:

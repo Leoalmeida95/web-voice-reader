@@ -8,7 +8,7 @@
 
     Object.assign(btn.style, {
         position: 'fixed',
-        bottom: '80px',
+        bottom: '20px',
         right: '20px',
         zIndex: 1000000,
         background: '#2d7ff9',
@@ -18,8 +18,34 @@
         padding: '12px 18px',
         fontSize: '16px',
         fontWeight: 'bold',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        transition: 'all 0.2s ease'
     });
+
+    function updateButtonPosition() {
+
+        const player = document.getElementById("web-voice-player-container");
+
+        if (!player) {
+            btn.style.bottom = "20px";
+            btn.style.right = "20px";
+            return;
+        }
+
+        const playerRect = player.getBoundingClientRect();
+
+        // 👉 posiciona o botão à esquerda do player
+        const playerWidth = playerRect.width;
+
+        btn.style.bottom = "20px";
+        btn.style.right = `${playerWidth + 40}px`; // 40px de espaço
+    }
+
+    // Atualiza posição continuamente (leve e suficiente)
+    setInterval(updateButtonPosition, 300);
+
+    // Também reage a resize
+    window.addEventListener("resize", updateButtonPosition);
 
     btn.onclick = async () => {
 
@@ -35,7 +61,6 @@
 
         try {
 
-            // 🔁 chama backend via background
             const response = await new Promise(resolve => {
                 chrome.runtime.sendMessage(
                     { type: "solve_question", text: questionText },
@@ -49,7 +74,10 @@
 
             const resposta = response.answer;
 
-            // 🔊 agora gera áudio (também via background)
+            if (!resposta) {
+                throw new Error("Resposta vazia");
+            }
+
             const ttsResponse = await new Promise(resolve => {
                 chrome.runtime.sendMessage(
                     { type: "tts", text: resposta },
@@ -63,7 +91,6 @@
 
             const bytes = new Uint8Array(ttsResponse.audio);
             const blob = new Blob([bytes], { type: "audio/wav" });
-
             const url = URL.createObjectURL(blob);
 
             createAudioPlayer(url);
