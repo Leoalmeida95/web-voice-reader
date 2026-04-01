@@ -88,12 +88,13 @@ async def stream_tts(text: str = Query(...)):
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
-            bufsize=0
+            bufsize=0,
+            encoding="utf-8"  # 🔥 ESSENCIAL
         )
 
         try:
             # envia texto inteiro
-            process.stdin.write((texto_limpo + "\n").encode("utf-8"))
+            process.stdin.write((texto_limpo + "\n").encode("utf-8", errors="ignore").decode("utf-8"))
             process.stdin.flush()
             process.stdin.close()
 

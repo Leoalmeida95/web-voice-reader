@@ -45,6 +45,7 @@ def gerar_audio_tts(texto: str, arquivo_saida: str):
         ],
         stdin=subprocess.PIPE,
         text=True,
+        encoding="utf-8"  # 🔥 ESSENCIAL
     )
 
     process.communicate(texto)
